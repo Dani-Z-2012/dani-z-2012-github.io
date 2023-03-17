@@ -1,15 +1,26 @@
-let seatArray = [];															//Todos los Ids de los asientos seleccionados
-let seatCuant = 0;															//Cantidad total de asientos seleccionados
-let seatId;																	//Id del asiento seleccionado
-var storedId = JSON.parse(localStorage.getItem("seats"));					//Carga los id guardas de las reservas
-let payButton = document.getElementsByClassName("pay");						//Botton de pago
-let resButton = document.getElementsByClassName("reset");					//Boton de reinicio
-const maxSeats = 250;														//Numero de asientos que se generan al iniciar la pagina
+let seatRow = [20,26,28,30,30,30,30,30,30,28,28,28,28,28,28,28,28,28,26,24,22,17,13];	//Cantidad de asientos por fila
+let evenRow = 21;																		//Cantidad de filas pares
+let oddRow = 23;																		//Cantidad de filas impares
+let maxSeats = 0;																		//Variable para el numero de asientos
+let totalRow = 22//seatRow.length;														//Cantidad total de filas de asientos
+let seatArray = [];																		//Todos los Ids de los asientos seleccionados
+let seatCuant = 0;																		//Cantidad total de asientos seleccionados
+let seatId;																				//Id del asiento seleccionado
+var storedId = JSON.parse(localStorage.getItem("seats"));								//Carga los id guardas de las reservas
+let payButton = document.getElementsByClassName("pay");									//Botton de pago
+let resButton = document.getElementsByClassName("reset");								//Boton de reinicio
+let currentRow = 0																		//Variable para el calculo de la creacion de asientos
 
 //Texto que se usara para mostrar el output
 const previewText = document.createElement("p");								
 previewText.textContent = "Preview Output";
-document.body.appendChild(previewText);
+document.body.getElementsByClassName("preview")[0].appendChild(previewText);
+
+//for (let i = 0; i < seatRow.length; i++) {
+//    maxSeats = maxSeats + seatRow[i];
+//}				
+
+
 
 //Define el valor del Array a 0 en vez de Null
 if (!storedId) {
@@ -42,12 +53,14 @@ function setText(pText, idText){
 	
 	//Ordena de menor a mayor los IDs y luego muestra el texto
 	seatArray.sort(compareNumbers);
-	previewText.textContent = "T:" + pText + "&ID:" + seatArray;
+	previewText.innerHTML = "Total de asientos: " + pText + "<br>" + "ID de los asientos: " + seatArray;
 }
 
 
+//const funcRepeat = (totalRow + 1) * 100 + seatRow[totalRow];
+
 //Generacion de las imagenes
-for(let i = 1; i <= maxSeats; i++){
+for(let i = 101; i <= (totalRow + 1) * 100 + seatRow[totalRow]; i){
 	
 	//Crea el elemento de la img
 	const seat = document.createElement('img');
@@ -60,16 +73,20 @@ for(let i = 1; i <= maxSeats; i++){
 		//Coloca un asiento en blanco
 		seat.setAttribute("src","images/asiento-blanco.png");
 	}
-	//Le da el ID al asiento
+	
+	//Asigna el atributo ID al asiento
 	seat.setAttribute("id",i);
 	
 	const isEven = evenNumber(i);
 	
 	//Selecciona donde colocar el asiento dependiendo si la ID es par o impar
 	if (isEven) {
-		document.body.getElementsByClassName("seat map")[0].getElementsByClassName("evens")[0].appendChild(seat);	
+		if (currentRow <= evenRow - 1) {
+			document.body.getElementsByClassName("evens")[0].getElementsByClassName("seat")[currentRow].appendChild(seat);
+		}
 	} else {
-		document.body.getElementsByClassName("seat map")[0].getElementsByClassName("odds")[0].appendChild(seat);
+		if (currentRow <= oddRow - 1)
+		document.body.getElementsByClassName("odds")[0].getElementsByClassName("seat")[currentRow].appendChild(seat);
 	}
 	
 	//Funcion al clickear las imagenes
@@ -85,7 +102,7 @@ for(let i = 1; i <= maxSeats; i++){
 			//Recoge el ID
 			seatId = this.getAttribute("id")
 			//Agrega 1 al total de asientos seleccionados
-			seatCuant = seatCuant + 1;
+			seatCuant++;
 			//Envia el total de asientos y la id del nuevo asientos al output de texto
 			setText(seatCuant, seatId);
 			
@@ -96,11 +113,19 @@ for(let i = 1; i <= maxSeats; i++){
 			//Recoge el id
 			seatId = this.getAttribute("id")
 			//Quita 1 al total de asientos seleccionados
-			seatCuant = seatCuant - 1;
+			seatCuant--;
 			//Envia el total de asientos y la id del nuevo asientos al output de texto
 			setText(seatCuant, seatId);
 		}
-	}	
+	}
+	
+	//Suma de i para respetar las ID correctas
+	if (i === seatRow[currentRow] + (currentRow + 1) * 100) {
+		currentRow++;
+		i = (currentRow + 1) * 100 + 1;
+	} else {
+		i++;
+	}
 }
 
 //Agrega los asientos seleccionados a los asientos reservados y luego recarga la pagina
@@ -120,3 +145,5 @@ resButton[0].onclick = function() {
 	//Recarga la pagina
 	location.reload();
 }
+
+
